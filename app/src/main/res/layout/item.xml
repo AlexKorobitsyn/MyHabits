@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="50dp">
+
+    <TextView
+        android:id="@+id/NameItem"
+        android:layout_width="83dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="8dp"
+        android:text="Название"></TextView>
+
+    <TextView
+        android:id="@+id/InfoItem"
+        android:layout_width="80dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="8dp"
+        android:text="Описание"></TextView>
+
+    <TextView
+        android:id="@+id/priorityItem"
+        android:layout_width="wrap_content"
+        android:layout_height="50dp"
+        android:layout_marginLeft="8dp"
+        android:text="Priority">
+
+    </TextView>
+
+    <TextView
+        android:id="@+id/typeItem"
+        android:layout_width="99dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="8dp"
+        android:text="Type"></TextView>
+
+    <TextView
+        android:id="@+id/freqItem"
+        android:layout_width="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_height="50dp"
+        android:layout_marginLeft="8dp"
+        android:text="колво"></TextView>
+
+    <TextView
+        android:id="@+id/CountItem"
+        android:layout_width="87dp"
+        android:layout_height="50dp"
+        android:layout_marginLeft="8dp"
+        android:text="частота"></TextView>
+<!--    <Spinner-->
+<!--        android:id="@+id/spinner"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:entries="@array/catNames" />-->
+
+</LinearLayout>
