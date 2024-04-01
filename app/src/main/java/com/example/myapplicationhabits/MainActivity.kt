@@ -2,119 +2,88 @@ package com.example.myapplicationhabits
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.os.PersistableBundle
-import android.view.Window
-import android.widget.Toast
+import android.view.MenuItem
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.iterator
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
+import androidx.appcompat.widget.Toolbar
+import androidx.core.view.GravityCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.navigation.NavigationView
+import androidx.drawerlayout.widget.DrawerLayout
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.ReportFragment.Companion.reportFragment
+import com.example.myapplicationhabits.databinding.ActivityMainBinding
+import com.example.myapplicationhabits.databinding.FragmentFirstFragMainBinding
+import com.google.gson.Gson
 
-class MainActivity : AppCompatActivity() {
-    private companion object {
-        const val SHARED_KEY = "SHARED_KEY"
-    }
-    private fun SaveData(list: ArrayList<Habit>){
-        val prefs: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
-        val editor: SharedPreferences.Editor = prefs.edit()
-        val gson = Gson()
-        val json: String = gson.toJson(list)
-        editor.putString(SHARED_KEY, json)
-        editor.apply()
-    }
-    private var yourArrayList: ArrayList<Habit> = ArrayList<Habit>()
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+    private lateinit var binding: ActivityMainBinding
+//    private val fragList = listOf(
+//        FirstFragMain.newInstance(),
+//        EmotionalFragMain.newInstance(),
+//        PhysicalFragMain.newInstance()
+//    )
+
     @SuppressLint("MissingInflatedId")
-    val bundle :Bundle = Bundle()
     override fun onCreate(savedInstanceState: Bundle?) {
-
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-//        val a:LinearLayout = findViewById(R.id.main)
-//        a.setBackgroundColor(Color.parseColor("#1D1B20"))
-        setContentView(R.layout.activity_main)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
-        val fabButton: FloatingActionButton = findViewById(R.id.fab)
-        fabButton.setOnClickListener {
-            val intent = Intent(this, AddHabitActivity::class.java)
-            startActivity(intent)
-        }
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
+        val drawerLayout = binding.drawerLayout
+        val toolbar = binding.toolbar
+        setSupportActionBar(toolbar)
+        val navigationView = binding.navView
+        navigationView.setNavigationItemSelectedListener(this)
+
+        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav)
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
+
+        if (savedInstanceState == null) {
+            supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, FirstFragMain()).commit()
+            navigationView.setCheckedItem(R.id.nav_home)
+        }
+//        val adapter = VpAdapter(this, fragList)
+//        binding.fragmentPager.adapter = adapter
     }
 
     override fun onResume() {
-        val a = intent.getStringExtra("habitname")
-
-        if(a != null){
-            val habit:Habit = Habit(a,
-                intent.getStringExtra("habitinfo"), intent.getStringExtra("habitpriority")
-                , intent.getStringExtra("habitType"), intent.getStringExtra("habitfreq"), intent.getStringExtra("habitperiodic"))
-
-            yourArrayList = getArrayList()
-            println("otladka")
-            val pos = intent.getIntExtra("position", -1)
-            if (pos == -1) {
-                yourArrayList.add(habit)
-            }
-            else{
-                yourArrayList[pos] = habit
-            }
-//            onSaveInstanceState(bundle)
-
-            // Сохранение yourArrayList в Intent
-            intent.putExtra("habitArrayList", yourArrayList)
-
-            val listView: RecyclerView = findViewById(R.id.listMain)
-            listView.hasFixedSize()
-            listView.layoutManager = LinearLayoutManager(this)
-            listView.adapter = MyAdapter(yourArrayList, this)
-            }
-        SaveData(yourArrayList)
-
+        val a = intent.getStringExtra("habit")
+        println("loadHabit: "+ a)
+        println("ONCREATEMAINACTIVITY")
         super.onResume()
     }
-
-
-    override fun onPause() {
-
-//        onSaveInstanceState(bundle)
-        super.onPause()
+    private fun openFrag(f:Fragment, idHolder: Int)
+    {
+        supportFragmentManager
+            .beginTransaction()
+            .replace(idHolder, f)
+            .commit()
+    }
+    override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.nav_home -> supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, FirstFragMain()).commit()
+            R.id.nav_about -> supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, InfoFragment()).commit()
+        }
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
+        return true
     }
 
-    override fun onStop() {
-        val bundle :Bundle = Bundle()
-        onSaveInstanceState(bundle)
-        super.onStop()
-    }
-    override fun onRestoreInstanceState(
-        savedInstanceState: Bundle?,
-        persistentState: PersistableBundle?
-    ) {
-
-        super.onRestoreInstanceState(savedInstanceState, persistentState)
-    }
-
-    private fun  getArrayList() : ArrayList<Habit>{
-        val prefs: SharedPreferences = this.getPreferences(Context.MODE_PRIVATE)
-        val gson = Gson()
-        val json = prefs.getString(SHARED_KEY, null);
-        val type = object : TypeToken<ArrayList<Habit>>() {}.type
-        return gson.fromJson(json, type);
-    }
-    override fun onSaveInstanceState(outState: Bundle, outPersistentState: PersistableBundle) {
-        outState.putParcelableArrayList("moveList", yourArrayList)
-        super.onSaveInstanceState(outState, outPersistentState)
+    override fun onBackPressed() {
+        super.onBackPressed()
+        if (binding.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            binding.drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            onBackPressedDispatcher.onBackPressed()
+        }
     }
 }

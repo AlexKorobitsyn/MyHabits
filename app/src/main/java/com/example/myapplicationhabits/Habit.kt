@@ -2,9 +2,10 @@ package com.example.myapplicationhabits
 
 import android.os.Parcel
 import android.os.Parcelable
+import java.io.Serializable
 
 data class Habit(var name: String?, var info: String?, var priority: String?, var type:String?,
-                 var howMuch:String?, var inTime:String?): Parcelable {
+                 var howMuch:String?, var inTime:String?): Parcelable, Serializable {
     constructor(parcel: Parcel) : this(
         parcel.readString(),
         parcel.readString(),

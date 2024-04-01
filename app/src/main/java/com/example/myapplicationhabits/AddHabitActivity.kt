@@ -1,7 +1,9 @@
 package com.example.myapplicationhabits
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,14 +15,16 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.get
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.gson.Gson
 
 class AddHabitActivity : AppCompatActivity() {
-
+    private val dataModel: HabitsModel by viewModels()
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -51,30 +55,37 @@ class AddHabitActivity : AppCompatActivity() {
         saveButton = findViewById(R.id.buttonSave)
         val cac = intent.getIntExtra("position", -1)
         println("cac $cac")
-        saveButton.setOnClickListener{
-            val intent:Intent = Intent(this, MainActivity::class.java)
+        saveButton.setOnClickListener {
             val checkedRadioButtonId = habitTypeRadioGroup.checkedRadioButtonId
-            var res:String = ""
-            res = when(checkedRadioButtonId){
-                -1 -> {
-                    "Тип не выбран"
-                }
-
+            var res: String = ""
+            res = when (checkedRadioButtonId) {
+                -1 -> "Тип не выбран"
                 else -> {
-                    // Найдём переключатель по его id
                     val selectedRadioButton = findViewById<RadioButton>(checkedRadioButtonId)
                     selectedRadioButton.text.toString()
                 }
             }
+            val habit = Habit(
+                habitNameEditText.text.toString(),
+                descriptionEditText.text.toString(),
+                prioritySpinner.selectedItemId.toString(),
+                res,
+                frequencyEditText.text.toString(),
+                periodicityEditText.text.toString()
+            )
+            dataModel.addNewHabit(habit)
+            dataModel.setHabits(habit)
+            val prefs: SharedPreferences = getPreferences(Context.MODE_PRIVATE)
+            val editor: SharedPreferences.Editor = prefs.edit()
+            val gson = Gson()
+            val json: String = gson.toJson(habit)
+            println(json)
+            editor.putString("habit", json)
+            editor.apply()
 
-            intent.putExtra("position", cac)
-            intent.putExtra("habitname", habitNameEditText.text.toString())
-            intent.putExtra("habitinfo", descriptionEditText.text.toString())
-            intent.putExtra("habitpriority", prioritySpinner.selectedItemId.toString())
-            intent.putExtra("habitType", res )
-            intent.putExtra("habitfreq", frequencyEditText.text.toString())
-            intent.putExtra("habitperiodic", periodicityEditText.text.toString())
-            startActivity(intent)
+            // Закрываем активность после сохранения
+            finish()
         }
     }
 }
+
