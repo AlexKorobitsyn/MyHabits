@@ -5,38 +5,45 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.activityViewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.myapplicationhabits.databinding.FragmentEmotionalFragMainBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [EmotionalFragMain.newInstance] factory method to
- * create an instance of this fragment.
- */
 class EmotionalFragMain : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private val dataModel: HabitsModel by activityViewModels()
 
+    lateinit var binding:FragmentEmotionalFragMainBinding
+    private var yourArrayList: ArrayList<Habit> = ArrayList<Habit>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_emotional_frag_main, container, false)
+        binding = FragmentEmotionalFragMainBinding.inflate(inflater)
+        setupRecyclerView()
+        return binding.root
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        dataModel.habitList.observe(viewLifecycleOwner, { habits ->
+            dataModel.habitList.value?.let { yourArrayList = it }
+            setupRecyclerView()
+        })
+    }
+
+    private fun setupRecyclerView() {
+        val filteredList = yourArrayList.filter { it.type == "Эмоциональная" }
+        val listView: RecyclerView = binding.listMain
+        println("call for EMotional main ${yourArrayList}")
+        listView.hasFixedSize()
+        listView.layoutManager = LinearLayoutManager(activity)
+        listView.adapter = activity?.let { MyAdapter(filteredList, it, "Эмоциональная") }
+    }
     companion object {
 
         @JvmStatic

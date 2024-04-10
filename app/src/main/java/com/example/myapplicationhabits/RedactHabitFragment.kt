@@ -47,42 +47,37 @@ class RedactHabitFragment : Fragment() {
         frequencyEditText = binding.editTextFrequency
         periodicityEditText = binding.editTextPeriodicity
         saveButton = binding.buttonSave
-        val habit = arguments?.getParcelable<Habit>("habit")
         val position = arguments?.getInt("position")
+        val type = arguments?.getString("type")
+        val listNow = dataModel.habitList.value?.filter { it.type == type}
+        val habit = position?.let { listNow?.get(it)  }
         if (habit != null && position != null) {
-            // Заполняем поля редактирования данными из Habit
             habitNameEditText.setText(habit.name)
             descriptionEditText.setText(habit.info)
 
-
             saveButton.setOnClickListener {
-                // Обновляем Habit в yourArrayList по полученной позиции
+                val checkedRadioButtonId = habitTypeRadioGroup.checkedRadioButtonId
+                val selectedRadioButton =
+                    habitTypeRadioGroup.findViewById<RadioButton>(checkedRadioButtonId)
+                val res = selectedRadioButton.text.toString()
                 val updatedHabit = Habit(
                     habitNameEditText.text.toString(),
                     descriptionEditText.text.toString(),
                     prioritySpinner.selectedItemId.toString(),
-                    "Тип не выбран",
+                    res,
                     frequencyEditText.text.toString(),
                     periodicityEditText.text.toString()
-                    // Добавьте остальные поля Habit здесь...
                 )
-                // Предполагается, что у вас есть доступ к yourArrayList в этом контексте
-                dataModel.habitList.value?.set(position, updatedHabit)
+                dataModel.habitList.value?.set(dataModel.habitList.value!!.indexOf(habit), updatedHabit)
 
-                // Обновляем данные в RecyclerView
-                // Предполагается, что у вас есть метод для обновления RecyclerView
-
-                // Возвращаемся к FirstFragMain
                 parentFragmentManager.popBackStack()
             }
         }
         else {
             saveButton.setOnClickListener {
                 val checkedRadioButtonId = habitTypeRadioGroup.checkedRadioButtonId
-                println("RedactHabitOnclick $checkedRadioButtonId")
                 var res: String = ""
                 if (checkedRadioButtonId != -1) {
-                    // Получаем выбранную радио-кнопку
                     val selectedRadioButton =
                         habitTypeRadioGroup.findViewById<RadioButton>(checkedRadioButtonId)
                     res = selectedRadioButton.text.toString()
@@ -100,7 +95,6 @@ class RedactHabitFragment : Fragment() {
 
                 dataModel.addNewHabit(habit)
                 dataModel.setHabits(habit)
-                println("REDACTCOUNTERHABITS : ${dataModel.counter.value}")
                 val prefs: SharedPreferences =
                     requireActivity().getPreferences(Context.MODE_PRIVATE)
                 val editor: SharedPreferences.Editor = prefs.edit()
@@ -109,7 +103,6 @@ class RedactHabitFragment : Fragment() {
                 editor.putString("habit", json)
                 editor.apply()
                 parentFragmentManager.popBackStack()
-                // Закрываем активность после сохранения
             }
         }
 

@@ -1,5 +1,6 @@
 package com.example.myapplicationhabits
 
+import RedactHabitFragment
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
@@ -15,18 +16,15 @@ import com.google.android.material.navigation.NavigationView
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.fragment.app.FragmentTransaction
 import androidx.lifecycle.ReportFragment.Companion.reportFragment
 import com.example.myapplicationhabits.databinding.ActivityMainBinding
 import com.example.myapplicationhabits.databinding.FragmentFirstFragMainBinding
 import com.google.gson.Gson
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener, FirstFragMain.OnFabClickedListener{
     private lateinit var binding: ActivityMainBinding
-//    private val fragList = listOf(
-//        FirstFragMain.newInstance(),
-//        EmotionalFragMain.newInstance(),
-//        PhysicalFragMain.newInstance()
-//    )
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,30 +32,24 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         enableEdgeToEdge()
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         val drawerLayout = binding.drawerLayout
         val toolbar = binding.toolbar
         setSupportActionBar(toolbar)
         val navigationView = binding.navView
         navigationView.setNavigationItemSelectedListener(this)
-
+        val fragmentManager: FragmentManager = supportFragmentManager
         val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav)
         drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, FirstFragMain()).commit()
+            fragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, ForPagerFragment()).commit()
             navigationView.setCheckedItem(R.id.nav_home)
         }
-//        val adapter = VpAdapter(this, fragList)
-//        binding.fragmentPager.adapter = adapter
     }
 
     override fun onResume() {
-        val a = intent.getStringExtra("habit")
-        println("loadHabit: "+ a)
-        println("ONCREATEMAINACTIVITY")
         super.onResume()
     }
     private fun openFrag(f:Fragment, idHolder: Int)
@@ -65,12 +57,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         supportFragmentManager
             .beginTransaction()
             .replace(idHolder, f)
+            .addToBackStack(null)
             .commit()
     }
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.nav_home -> supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, FirstFragMain()).commit()
+                .replace(R.id.fragment_container, ForPagerFragment()).commit()
             R.id.nav_about -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, InfoFragment()).commit()
         }
@@ -86,4 +79,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             onBackPressedDispatcher.onBackPressed()
         }
     }
+
+    override fun onFabClicked() {
+        openFrag(RedactHabitFragment(), R.id.fragment_container)
+    }
+
+
+
 }
